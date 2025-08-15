@@ -51,7 +51,7 @@ jobs:
           rm -rf app/api || true
           # Provide stub type for uploadthing core so imports still typecheck
           mkdir -p types
-          printf "// stub added in CI\ndeclare module \"@/app/api/uploadthing/core\" { export type OurFileRouter = unknown }\n" > types/uploadthing-core.d.ts
+          printf "// stub added in CI\ndeclare module \"@/app/api/uploadthing/core\" { import type { FileRouter } from \"uploadthing/server\"; export type OurFileRouter = FileRouter }\n" > types/uploadthing-core.d.ts
 
       - name: Build (static export)
         run: npm run build
