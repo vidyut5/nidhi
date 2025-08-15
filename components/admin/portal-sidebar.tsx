@@ -18,7 +18,7 @@ export function AdminPortalSidebar() {
     { href: '/admin/sellers', label: 'Sellers', icon: Users },
     { href: '/admin/reviews', label: 'Reviews', icon: Users },
     { href: '/admin/guidelines', label: 'Guidelines', icon: BookOpen },
-    { href: '/sell/leads', label: 'Seller Leads', icon: Users },
+    { href: '/admin/seller-leads', label: 'Seller Leads', icon: Users },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
   ]
   return (
