@@ -47,7 +47,11 @@ jobs:
         run: npm run lint || true
 
       - name: Remove API routes for static export
-        run: rm -rf app/api || true
+        run: |
+          rm -rf app/api || true
+          # Provide stub type for uploadthing core so imports still typecheck
+          mkdir -p types
+          printf "// stub added in CI\ndeclare module \"@/app/api/uploadthing/core\" { export type OurFileRouter = unknown }\n" > types/uploadthing-core.d.ts
 
       - name: Build (static export)
         run: npm run build
