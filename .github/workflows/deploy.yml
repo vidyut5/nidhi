@@ -46,6 +46,9 @@ jobs:
       - name: Lint
         run: npm run lint || true
 
+      - name: Remove API routes for static export
+        run: rm -rf app/api || true
+
       - name: Build (static export)
         run: npm run build
 
