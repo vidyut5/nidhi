@@ -1,0 +1,120 @@
+{
+  "messages": [
+    {
+      "id": "msg_xohipx",
+      "threadId": "support-1",
+      "authorId": "vidyut",
+      "authorRole": "vidyut",
+      "content": "Hi, how can we help you today?",
+      "createdAt": "2025-08-14T16:23:34.388Z"
+    },
+    {
+      "id": "msg_m40i05",
+      "threadId": "support-1",
+      "authorId": "guest",
+      "authorRole": "buyer",
+      "content": "Need the invoice for last order",
+      "createdAt": "2025-08-14T16:26:34.388Z"
+    },
+    {
+      "id": "msg_zpqewl",
+      "threadId": "support-1",
+      "authorId": "vidyut",
+      "authorRole": "vidyut",
+      "content": "Sure, sending it here and to your email.",
+      "attachments": [
+        {
+          "url": "/invoice.pdf",
+          "name": "invoice.pdf",
+          "type": "application/pdf",
+          "size": 102400
+        }
+      ],
+      "createdAt": "2025-08-14T16:28:34.388Z"
+    },
+    {
+      "id": "msg_crbiuh",
+      "threadId": "order-DEMO-1001-seller",
+      "authorId": "seller-1",
+      "authorRole": "seller",
+      "content": "Your order is packed and will ship today.",
+      "createdAt": "2025-08-14T16:39:34.388Z"
+    },
+    {
+      "id": "msg_i4gqra",
+      "threadId": "order-DEMO-1001-seller",
+      "authorId": "guest",
+      "authorRole": "buyer",
+      "content": "Great, please ensure fragile handling.",
+      "createdAt": "2025-08-14T16:41:34.388Z"
+    },
+    {
+      "id": "msg_sxrjlg",
+      "threadId": "order-DEMO-1001-seller",
+      "authorId": "seller-1",
+      "authorRole": "seller",
+      "content": "Noted. Sharing label copy.",
+      "attachments": [
+        {
+          "url": "/uploads/sample-label.png",
+          "name": "label.png",
+          "type": "image/png",
+          "size": 20480
+        }
+      ],
+      "createdAt": "2025-08-14T16:43:34.388Z"
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2025-08-14T17:22:23.943Z",
+      "threadId": "support-1",
+      "authorId": "guest",
+      "authorRole": "buyer",
+      "content": "hi"
+    }
+  ],
+  "threads": [
+    {
+      "id": "support-1",
+      "kind": "support",
+      "title": "Vidyut Support",
+      "participants": [
+        {
+          "id": "guest",
+          "name": "Guest",
+          "role": "buyer"
+        },
+        {
+          "id": "vidyut",
+          "name": "Vidyut Support",
+          "role": "vidyut",
+          "whatsapp": "+919999999999"
+        }
+      ],
+      "createdAt": "2025-08-14T16:21:34.388Z",
+      "updatedAt": "2025-08-14T17:22:23.943Z"
+    },
+    {
+      "id": "order-DEMO-1001-seller",
+      "kind": "order",
+      "title": "Order DEMO-1001 (Seller)",
+      "participants": [
+        {
+          "id": "guest",
+          "name": "Guest",
+          "role": "buyer"
+        },
+        {
+          "id": "seller-1",
+          "name": "Raj Equipments",
+          "role": "seller",
+          "whatsapp": "+918888888888"
+        }
+      ],
+      "orderId": "DEMO-1001",
+      "target": "seller",
+      "createdAt": "2025-08-14T15:21:34.388Z",
+      "updatedAt": "2025-08-14T17:06:34.388Z"
+    }
+  ]
+}

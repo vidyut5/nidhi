@@ -189,9 +189,13 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground touch-manipulation;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  html, body { min-height: 100dvh; }
+  .min-screen { min-height: 100dvh; }
+  .safe-area-pad { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  .no-h-scroll { touch-action: pan-y; overscroll-behavior-y: contain; }
   
   /* Focus management */
   .focus-visible {
@@ -201,6 +205,16 @@
   /* Selection styles */
   ::selection {
     @apply bg-primary/20 text-primary-foreground;
+  }
+
+  /* Standard page container used across app pages */
+  .container {
+    container-type: inline-size;
+    max-width: 72rem; /* ~1152px */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 

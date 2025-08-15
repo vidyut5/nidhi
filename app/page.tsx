@@ -1,10 +1,12 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import { HeroSectionModern } from "@/components/ui/hero-section-modern";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { categories, getFeaturedProducts } from "@/lib/dummy-data";
+import { getNewProducts } from "@/lib/dummy-data";
+import { CategoriesCompact } from "@/components/home/categories-compact";
 import { 
   Zap, 
   Package, 
@@ -28,8 +30,32 @@ function HeroSkeleton() {
 }
 
 export default function Home() {
-  const featuredProducts = getFeaturedProducts();
+  const latestProducts = getNewProducts();
   const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`;
+  
+  type ProductLike = {
+    images?: unknown
+    imageUrl?: unknown
+    image_url?: unknown
+  };
+
+  function getProductImages(product: ProductLike | null | undefined): string[] {
+    if (!product) return [];
+    const { images, imageUrl, image_url } = product;
+    if (Array.isArray(images)) {
+      return images.filter((v): v is string => typeof v === 'string' && v.trim().length > 0);
+    }
+    if (typeof images === 'string' && images.trim().length > 0) {
+      return [images];
+    }
+    if (typeof imageUrl === 'string' && imageUrl.trim().length > 0) {
+      return [imageUrl];
+    }
+    if (typeof image_url === 'string' && image_url.trim().length > 0) {
+      return [image_url];
+    }
+    return [];
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -38,62 +64,22 @@ export default function Home() {
         <HeroSectionModern />
       </Suspense>
 
-      {/* Categories Section */}
-      <section className="py-16 bg-white">
-        <div className="container-wide">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Shop by Category</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Explore our comprehensive range of electrical products and solutions
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-            {categories.slice(0, 8).map((category) => (
-              <Link 
-                key={category.id} 
-                href={`/category/${category.slug}`}
-                className="group"
-              >
-                <Card className="text-center hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-500">
-                  <CardContent className="p-6">
-                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">
-                      {category.icon}
-                    </div>
-                    <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {category.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 mb-3">{category.productCount} products</p>
-                    {category.isPopular && (
-                      <Badge variant="secondary" className="text-xs">Popular</Badge>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+      {/* Categories Section - swap to compact grid matching /categories */}
+      {/* Defer categories on first paint */}
+      <Suspense fallback={null}>
+        <CategoriesCompact />
+      </Suspense>
 
-          <div className="text-center">
-            <Button asChild variant="outline" size="lg">
-              <Link href="/category/all">
-                View All Categories
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section className="py-16 bg-gray-50">
-        <div className="container-wide">
+      {/* Latest Products */}
+      <section className="py-16 bg-gray-50" suppressHydrationWarning>
+        <div className="container mx-auto max-w-6xl px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Featured Products</h2>
-              <p className="text-gray-600">Handpicked electrical solutions for your needs</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Latest Products</h2>
+              <p className="text-gray-600">Recently added electrical solutions with images</p>
             </div>
             <Button asChild variant="outline">
-              <Link href="/category/all?sort=featured">
+              <Link href="/category/all?sort=newest">
                 View All
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -101,14 +87,21 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.slice(0, 4).map((product) => (
+            {latestProducts.slice(0, 4).map((product) => {
+              const images = getProductImages(product as unknown as ProductLike)
+              const primaryImage = images[0] ?? '/product-1.jpg'
+              return (
               <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-300">
                 <CardContent className="p-4">
                   <div className="relative mb-4">
-                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                      <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                        <Package className="h-12 w-12 text-gray-400" />
-                      </div>
+                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
+                      <Image
+                        src={primaryImage}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
                     {product.isNew && (
                       <Badge className="absolute top-2 left-2 bg-green-500 text-white text-xs">
@@ -154,21 +147,21 @@ export default function Home() {
                     </div>
 
                     <Button className="w-full" size="sm" asChild>
-                      <Link href={`/product/${product.id}`}>
+                      <Link href={`/product/${product.slug}`}>
                         View Details
                       </Link>
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )})}
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
       <section className="py-16 bg-blue-600 text-white">
-        <div className="container-wide">
+        <div className="container mx-auto max-w-6xl px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold mb-2">2,500+</div>
@@ -192,7 +185,7 @@ export default function Home() {
 
       {/* Why Choose Us */}
       <section className="py-16 bg-white">
-        <div className="container-wide">
+        <div className="container mx-auto max-w-6xl px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Vidyut?</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
