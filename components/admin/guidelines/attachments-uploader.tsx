@@ -5,12 +5,9 @@ import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
 export function AttachmentsUploader({ onChange, inputName, defaultValue }: { onChange?: (files: { url: string; name?: string; type?: string; size?: number }[]) => void; inputName?: string; defaultValue?: string }) {
   return (
-    <UploadButton<OurFileRouter, never>
+    <UploadButton<OurFileRouter, undefined>
       className="ut-button"
-      endpoint={{
-        route: 'guidelineAttachment',
-      } as any}
-      input={undefined as never}
+      endpoint={"guidelineAttachment" as keyof OurFileRouter}
       onClientUploadComplete={(res: Array<{ url: string; name: string; type: string; size: number }> | undefined) => {
         const mapped = (res ?? []).map((f) => ({ url: f.url, name: f.name, type: f.type, size: f.size }))
         onChange?.(mapped)
