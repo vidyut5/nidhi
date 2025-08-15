@@ -1,12 +1,17 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+const isGithubPages = process.env.GITHUB_PAGES === 'true'
+const repoName = 'vidyut1'
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
   poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
+    // For static export / GitHub Pages
+    unoptimized: isGithubPages,
   },
   modularizeImports: {
     "lucide-react": {
@@ -17,6 +22,8 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["@tanstack/react-query", "framer-motion"],
   },
+  // Static export for GitHub Pages
+  ...(isGithubPages ? { output: 'export' as const, basePath: `/${repoName}`, assetPrefix: `/${repoName}/` } : {}),
   transpilePackages: [
     "uploadthing",
     "@uploadthing/react",
