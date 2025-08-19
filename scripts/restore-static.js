@@ -56,6 +56,28 @@ excludeFiles.forEach(file => {
   }
 });
 
+// Restore modified files
+const modifyFiles = [
+  'app/orders/page.tsx',
+  'lib/auth.ts'
+];
+
+modifyFiles.forEach(file => {
+  const sourcePath = path.join(process.cwd(), backupDir, file);
+  const restorePath = path.join(process.cwd(), file);
+  
+  if (fs.existsSync(sourcePath)) {
+    console.log(`📝 Restoring ${file}...`);
+    // Remove existing if any
+    if (fs.existsSync(restorePath)) {
+      fs.unlinkSync(restorePath);
+    }
+    // Restore from backup
+    fs.renameSync(sourcePath, restorePath);
+    console.log(`✅ Restored ${file}`);
+  }
+});
+
 // Clean up backup directory
 if (fs.existsSync(backupDir)) {
   fs.rmSync(backupDir, { recursive: true, force: true });
