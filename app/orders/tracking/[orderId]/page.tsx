@@ -8,8 +8,9 @@ export async function generateStaticParams() {
   }))
 }
 
-export default function OrderTrackingPage({ params }: { params: { orderId: string } }) {
-  return <OrderTrackingClient orderId={params.orderId} />
+export default async function OrderTrackingPage({ params }: { params: Promise<{ orderId: string }> }) {
+  const { orderId } = await params
+  return <OrderTrackingClient orderId={orderId} />
 }
 
 
