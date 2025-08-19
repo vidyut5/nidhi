@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 
+// Static export configuration
+export const dynamic = 'force-static'
+export const revalidate = false
+
 async function verifyAdmin() {
   const cookieStore = await cookies()
   const token = cookieStore.get('admin_session')?.value

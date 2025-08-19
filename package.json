@@ -8,6 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "prepare-static": "node scripts/prepare-static.js",
+    "restore-static": "node scripts/restore-static.js",
+    "build:static": "npm run prepare-static && next build && npm run restore-static",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "bootstrap:appwrite": "node --env-file=.env.local scripts/appwrite-bootstrap.mjs"

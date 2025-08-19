@@ -30,8 +30,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Prepare for static export
+        run: npm run prepare-static
+      
       - name: Build with Next.js
         run: npm run build
+      
+      - name: Restore project files
+        run: npm run restore-static
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
