@@ -37,7 +37,7 @@ excludeDirs.forEach(dir => {
   if (fs.existsSync(sourcePath)) {
     console.log(`📦 Backing up ${dir}...`);
     // Create backup
-    if (!fs.existsSync(path.dirname(backupPath))) {
+    if (!fs.existsSync(path.dirname(backupPath)) {
       fs.mkdirSync(path.dirname(backupPath), { recursive: true });
     }
     fs.renameSync(sourcePath, backupPath);
@@ -53,7 +53,7 @@ excludeFiles.forEach(file => {
   if (fs.existsSync(sourcePath)) {
     console.log(`📦 Backing up ${file}...`);
     // Create backup directory
-    if (!fs.existsSync(path.dirname(backupPath))) {
+    if (!fs.existsSync(path.dirname(backupPath)) {
       fs.mkdirSync(path.dirname(backupPath), { recursive: true });
     }
     fs.renameSync(sourcePath, backupPath);
@@ -70,7 +70,7 @@ modifyFiles.forEach(file => {
     console.log(`📝 Modifying ${file}...`);
     
     // Create backup
-    if (!fs.existsSync(path.dirname(backupPath))) {
+    if (!fs.existsSync(path.dirname(backupPath)) {
       fs.mkdirSync(path.dirname(backupPath), { recursive: true });
     }
     fs.copyFileSync(filePath, backupPath);
@@ -82,7 +82,21 @@ modifyFiles.forEach(file => {
     content = content.replace(/import\s*{\s*prisma\s*}\s*from\s*['"]@\/lib\/prisma['"];?\s*/g, '');
     content = content.replace(/import\s*{\s*prisma\s*}\s*from\s*['"]@\/lib\/prisma['"];?\s*/g, '');
     
-    // Remove any prisma usage
+    // Replace prisma calls with mock data or safe defaults
+    if (file.includes('orders/page.tsx')) {
+      // Replace prisma calls with mock data for orders page
+      content = content.replace(/const\s+purchases\s*=\s*await\s+prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'const purchases = []');
+      content = content.replace(/purchases\?\./g, 'purchases.');
+      content = content.replace(/purchases\s*\?\s*\./g, 'purchases.');
+    }
+    
+    if (file.includes('auth.ts')) {
+      // Replace prisma calls with mock data for auth
+      content = content.replace(/await\s+prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'null');
+      content = content.replace(/prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'null');
+    }
+    
+    // Remove any remaining prisma usage
     content = content.replace(/prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'null');
     content = content.replace(/await\s+prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'null');
     
