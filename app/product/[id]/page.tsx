@@ -34,6 +34,13 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+// Generate static params for static export
+export async function generateStaticParams() {
+  return products.map((product) => ({
+    id: product.id,
+  }))
+}
+
 export default function ProductDetailPage() {
   const params = useParams()
   const productParam = params.id as string

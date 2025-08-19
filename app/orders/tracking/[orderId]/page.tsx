@@ -27,6 +27,14 @@ import {
 import { cn } from '@/lib/utils'
 import { products as demoProducts } from '@/lib/dummy-data'
 
+// Generate static params for static export
+export async function generateStaticParams() {
+  // Generate demo order IDs for static export
+  return Array.from({ length: 10 }, (_, i) => ({
+    orderId: `demo-order-${i + 1}`,
+  }))
+}
+
 interface OrderStatus {
   id: string
   status: 'ordered' | 'confirmed' | 'processing' | 'shipped' | 'out-for-delivery' | 'delivered' | 'cancelled'

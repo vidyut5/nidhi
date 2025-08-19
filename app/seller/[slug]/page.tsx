@@ -12,6 +12,13 @@ import { demoSellers, demoProducts, demoReviews } from '@/lib/demo-data'
 import { Star, MapPin, Phone, Mail, Shield, Clock, Store, Users } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
+// Generate static params for static export
+export async function generateStaticParams() {
+  return demoSellers.map((seller) => ({
+    slug: seller.name.toLowerCase().replace(/\s+/g, '-'),
+  }))
+}
+
 export default function SellerPublicProfile() {
   const params = useParams()
   const slug = (params.slug as string) || ''

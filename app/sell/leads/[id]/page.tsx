@@ -8,6 +8,14 @@ import { Button } from '@/components/ui/button'
 import { Phone, Mail, Globe, Building2, MapPin } from 'lucide-react'
 import Link from 'next/link'
 
+// Generate static params for static export
+export async function generateStaticParams() {
+  // Generate demo lead IDs for static export
+  return Array.from({ length: 10 }, (_, i) => ({
+    id: `demo-lead-${i + 1}`,
+  }))
+}
+
 type Lead = {
   id: string
   name: string
