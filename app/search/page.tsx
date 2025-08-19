@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
+import { ProductCard as UniversalProductCard } from '@/components/product/product-card'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { products, categories, searchProducts } from '@/lib/dummy-data'
@@ -388,67 +389,7 @@ function SearchPageInner() {
                   : "grid-cols-1"
               )}>
                 {resultsToShow.map((product) => (
-                  <Card key={product.id} className="group hover:shadow-lg transition-shadow">
-                    <CardContent className="p-4">
-                      <Link href={`/product/${product.slug}`}>
-                        <div className="relative mb-3">
-                          <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                            <Image
-                              src={Array.isArray(product.images) && product.images[0]
-                                ? product.images[0]
-                                : '/product-1.jpg'}
-                              alt={product.name}
-                              fill
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                              className="object-cover"
-                              placeholder="blur"
-                              blurDataURL="/placeholder.svg"
-                            />
-                          </div>
-                          
-                          {/* Badges */}
-                          <div className="absolute top-2 left-2 space-y-1">
-                            {product.isNew && (
-                              <Badge className="bg-green-500 text-white text-xs">New</Badge>
-                            )}
-                            {product.discount && (
-                              <Badge className="bg-red-500 text-white text-xs">
-                                {product.discount}% OFF
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="text-xs text-gray-500 uppercase tracking-wide">
-                            {product.brand}
-                          </div>
-                          
-                          <h3 className="font-medium line-clamp-2 leading-tight">
-                            {product.name}
-                          </h3>
-                          
-                          {renderStars(product.rating)}
-                          
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-bold text-lg">
-                                {formatPrice(product.price)}
-                              </div>
-                              {product.originalPrice && (
-                                <div className="text-xs text-gray-500 line-through">
-                                  {formatPrice(product.originalPrice)}
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {product.stock} in stock
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </CardContent>
-                  </Card>
+                  <UniversalProductCard key={product.id} product={product as any} size={viewMode === 'grid' ? 'md' : 'lg'} variant="market" />
                 ))}
               </div>
             )}

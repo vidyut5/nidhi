@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import { HeroSectionModern } from "@/components/ui/hero-section-modern";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProductCard } from "@/components/product/product-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -87,74 +88,9 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {latestProducts.slice(0, 4).map((product) => {
-              const images = getProductImages(product as unknown as ProductLike)
-              const primaryImage = images[0] ?? '/product-1.jpg'
-              return (
-              <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-300">
-                <CardContent className="p-4">
-                  <div className="relative mb-4">
-                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
-                      <Image
-                        src={primaryImage}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    {product.isNew && (
-                      <Badge className="absolute top-2 left-2 bg-green-500 text-white text-xs">
-                        New
-                      </Badge>
-                    )}
-                    {product.discount && (
-                      <Badge className="absolute top-2 right-2 bg-red-500 text-white text-xs">
-                        {product.discount}% OFF
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide">
-                      {product.brand}
-                    </div>
-                    <h3 className="font-medium line-clamp-2">{product.name}</h3>
-                    
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-3 w-3 ${
-                            i < Math.floor(product.rating)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                      <span className="text-xs text-gray-500 ml-1">({product.reviewCount})</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-bold text-lg">{formatPrice(product.price)}</div>
-                        {product.originalPrice && (
-                          <div className="text-sm text-gray-500 line-through">
-                            {formatPrice(product.originalPrice)}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <Button className="w-full" size="sm" asChild>
-                      <Link href={`/product/${product.slug}`}>
-                        View Details
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )})}
+            {latestProducts.slice(0, 4).map((product) => (
+              <ProductCard key={product.id} product={product as any} size="md" variant="market" />
+            ))}
           </div>
         </div>
       </section>

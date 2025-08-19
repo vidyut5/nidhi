@@ -25,15 +25,14 @@ export function HeroSectionModern() {
                             <div className="space-y-8 lg:col-span-2">
                                 <div className="space-y-4">
                                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold animate-in fade-in-0 slide-in-from-left-4 duration-700">
-                                        India's Leading{' '}
+                                        India's Largest{' '}
                                         <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                            Electrical
+                                            Electricity Information
                                         </span>{' '}
-                                        Marketplace
+                                        Platform for B2B, D2C and C2C
                                     </h1>
-                                    <p className="text-lg text-muted-foreground max-w-2xl animate-in fade-in-0 slide-in-from-left-4 duration-700 delay-200">
-                                        Connect with 2,500+ verified suppliers. Access 10,000+ genuine electrical products. 
-                                        Get competitive prices and reliable delivery for all your electrical needs.
+                                    <p className="text-sm sm:text-base text-muted-foreground max-w-2xl animate-in fade-in-0 slide-in-from-left-4 duration-700 delay-200">
+                                        Produced by <span className="font-semibold text-foreground">Madhu Powertech Private Limited</span>
                                     </p>
                                     
                                     {/* Quick Stats */}

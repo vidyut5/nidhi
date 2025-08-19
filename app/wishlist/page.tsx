@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { ProductCard as UniversalProductCard } from '@/components/product/product-card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { AddToCartButton } from '@/components/add-to-cart-button'
@@ -129,108 +130,7 @@ export default function WishlistPage() {
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {sortedItems.map((item) => (
-            <Card key={item.id} className="group hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="relative aspect-square mb-4 rounded-lg overflow-hidden bg-muted">
-                  <Image
-                    src={item.imageUrl || '/placeholder.svg'}
-                    alt={item.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                  />
-                  <div className="absolute top-2 right-2">
-                    <WishlistButton 
-                      product={{
-                        id: item.id,
-                        name: item.name,
-                        slug: item.slug,
-                        price: item.price,
-                        originalPrice: item.originalPrice,
-                        images: [item.imageUrl],
-                        brand: item.brand,
-                        stock: item.stock,
-                        rating: item.rating,
-                        reviewCount: item.reviewCount,
-                        sellerId: item.sellerId,
-                        sellerName: item.sellerName,
-                      }} 
-                      variant="ghost" 
-                      className="bg-white/80 hover:bg-white shadow-sm" 
-                    />
-                  </div>
-                  {item.stock <= 0 && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <Badge variant="destructive">Out of Stock</Badge>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <div>
-                    <Link href={`/product/${item.slug}`}>
-                      <h3 className="font-medium text-sm hover:text-primary transition-colors line-clamp-2">
-                        {item.name}
-                      </h3>
-                    </Link>
-                    {item.brand && (
-                      <p className="text-xs text-muted-foreground">{item.brand}</p>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={cn(
-                            "h-3 w-3",
-                            i < Math.floor(item.rating)
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-muted-foreground"
-                          )}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      ({item.reviewCount})
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{formatPrice(item.price)}</span>
-                    {item.originalPrice && item.originalPrice > item.price && (
-                      <>
-                        <span className="text-xs text-muted-foreground line-through">
-                          {formatPrice(item.originalPrice)}
-                        </span>
-                        <Badge variant="destructive" className="text-xs">
-                          {Math.round((1 - item.price / item.originalPrice) * 100)}% OFF
-                        </Badge>
-                      </>
-                    )}
-                  </div>
-                  
-                   <AddToCartButton 
-                    product={{
-                      id: item.id,
-                      name: item.name,
-                      slug: item.slug,
-                      price: item.price,
-                      originalPrice: item.originalPrice,
-                      imageUrls: JSON.stringify([item.imageUrl]),
-                      brand: item.brand,
-                      stock: item.stock,
-                      sellerId: item.sellerId,
-                      sellerName: item.sellerName,
-                    }} 
-                    size="sm"
-                    className="w-full"
-                    showQuantityControls={false}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <UniversalProductCard key={item.id} product={{ ...item, images: [item.imageUrl] } as any} size="md" variant="market" />
           ))}
         </div>
       ) : (

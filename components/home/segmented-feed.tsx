@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { ProductCard as UniversalProductCard } from "@/components/product/product-card"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -226,123 +227,15 @@ function ProductCard({ product, variant = "trending" }: ProductCardProps) {
   const config = badgeConfig[variant]
 
   return (
-    <Card className="group relative overflow-hidden border-0 shadow-elevation hover:shadow-elevation-lg transition-all duration-300">
-      <Link href={`/product/${product.slug}`}>
-        {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden">
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            placeholder="blur"
-            blurDataURL="/placeholder.svg"
-          />
-          
-          {/* Overlays */}
-          <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-            <Badge variant={config.variant} className="text-xs">
-              <config.icon className="mr-1 h-3 w-3" />
-              {config.text}
-            </Badge>
-            {discount > 0 && (
-              <Badge variant="destructive" className="text-xs">
-                -{discount}%
-              </Badge>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
-              <Heart className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
-              <Eye className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Quick Add to Cart */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-            <Button size="sm" className="w-full">
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to Cart
-            </Button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <CardContent className="p-4">
-          <div className="space-y-2">
-            {/* Brand & Category */}
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span className="font-medium">{product.brand}</span>
-              <span>{product.category}</span>
-            </div>
-
-            {/* Product Name */}
-            <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
-              {product.name}
-            </h3>
-
-            {/* Rating */}
-            <div className="flex items-center space-x-1">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={cn(
-                      "h-3 w-3",
-                      i < Math.floor(product.rating)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    )}
-                  />
-                ))}
-              </div>
-              <span className="text-xs text-muted-foreground">
-                {product.rating} ({product.reviewCount})
-              </span>
-            </div>
-
-            {/* Stats */}
-            {variant === "trending" && product.salesCount && (
-              <p className="text-xs text-muted-foreground">
-                {product.salesCount.toLocaleString()} sold
-              </p>
-            )}
-            {variant === "new" && product.views && (
-              <p className="text-xs text-muted-foreground">
-                {product.views.toLocaleString()} views
-              </p>
-            )}
-            {variant === "top" && product.salesCount && (
-              <p className="text-xs text-muted-foreground">
-                Top Seller
-              </p>
-            )}
-          </div>
-        </CardContent>
-
-        {/* Footer */}
-        <CardFooter className="p-4 pt-0">
-          <div className="flex items-center justify-between w-full">
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-lg">
-                  ₹{product.price.toLocaleString()}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through">
-                    ₹{product.originalPrice.toLocaleString()}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardFooter>
-      </Link>
-    </Card>
+    <UniversalProductCard
+      product={{
+        ...product,
+        images: [product.imageUrl],
+        category: { id: product.category, name: product.category, slug: product.category.toLowerCase() }
+      } as any}
+      size="md"
+      variant="market"
+    />
   )
 }
 
@@ -381,7 +274,16 @@ export function SegmentedFeed() {
           <TabsContent value="trending">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {trendingProducts.map((product) => (
-                <ProductCard key={product.id} product={product} variant="trending" />
+                <UniversalProductCard
+                  key={product.id}
+                  product={{
+                    ...product,
+                    images: [product.imageUrl],
+                    category: { id: product.category, name: product.category, slug: product.category.toLowerCase() },
+                  } as any}
+                  variant="market"
+                  size="md"
+                />
               ))}
             </div>
             <div className="text-center mt-8">
@@ -398,7 +300,16 @@ export function SegmentedFeed() {
           <TabsContent value="new">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {newProducts.map((product) => (
-                <ProductCard key={product.id} product={product} variant="new" />
+                <UniversalProductCard
+                  key={product.id}
+                  product={{
+                    ...product,
+                    images: [product.imageUrl],
+                    category: { id: product.category, name: product.category, slug: product.category.toLowerCase() },
+                  } as any}
+                  variant="market"
+                  size="md"
+                />
               ))}
             </div>
             <div className="text-center mt-8">
@@ -415,7 +326,16 @@ export function SegmentedFeed() {
           <TabsContent value="top">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {topProducts.map((product) => (
-                <ProductCard key={product.id} product={product} variant="top" />
+                <UniversalProductCard
+                  key={product.id}
+                  product={{
+                    ...product,
+                    images: [product.imageUrl],
+                    category: { id: product.category, name: product.category, slug: product.category.toLowerCase() },
+                  } as any}
+                  variant="market"
+                  size="md"
+                />
               ))}
             </div>
             <div className="text-center mt-8">

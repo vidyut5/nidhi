@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, Users, Package, Boxes, Settings, BookOpen } from 'lucide-react'
+import { LayoutGrid, Users, Package, Boxes, Settings, BookOpen, Building2 } from 'lucide-react'
 
 export function AdminPortalSidebar() {
   const pathname = usePathname()
@@ -18,6 +18,7 @@ export function AdminPortalSidebar() {
     { href: '/admin/sellers', label: 'Sellers', icon: Users },
     { href: '/admin/reviews', label: 'Reviews', icon: Users },
     { href: '/admin/guidelines', label: 'Guidelines', icon: BookOpen },
+    { href: '/admin/state-info', label: 'State Info', icon: Building2 },
     { href: '/admin/seller-leads', label: 'Seller Leads', icon: Users },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
   ]

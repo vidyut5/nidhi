@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { ProductCard as UniversalProductCard } from '@/components/product/product-card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -310,73 +311,7 @@ export default function CategoryListing({ slug }: CategoryListingProps) {
           ) : (
             <div className={cn('grid gap-4', viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1')}>
               {categoryProducts.map((product) => (
-                <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-300">
-                  <CardContent className="p-4">
-                    <div className="relative mb-3">
-                      <Link href={`/product/${product.slug}`}>
-                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                          <Image
-                            src={Array.isArray(product.images) && product.images.length > 0
-                              ? product.images[0]
-                              : (product.imageUrl || '/product-1.jpg')}
-                            alt={product.name}
-                            fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 20vw"
-                            className="object-cover"
-                          />
-                        </div>
-                      </Link>
-
-                      <div className="absolute top-2 left-2 space-y-1">
-                        {product.isNew && <Badge className="bg-green-500 text-white text-xs">New</Badge>}
-                        {product.discount && (
-                          <Badge className="bg-red-500 text-white text-xs">{product.discount}% OFF</Badge>
-                        )}
-                      </div>
-
-                      <div className="absolute top-2 right-2">
-                        <WishlistButton product={{
-                          id: product.id,
-                          name: product.name,
-                          slug: product.slug,
-                          price: product.price,
-                          originalPrice: product.originalPrice,
-                          images: Array.isArray(product.images) ? product.images : [product.imageUrl],
-                          brand: product.brand,
-                          stock: product.stock,
-                          rating: product.rating,
-                          reviewCount: product.reviewCount,
-                          sellerId: 'demo',
-                          sellerName: 'Demo Seller',
-                        }} variant="ghost" size="icon" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="text-xs text-gray-500 uppercase tracking-wide">{product.brand}</div>
-
-                      <Link href={`/product/${product.slug}`}>
-                        <h3 className="font-medium text-sm line-clamp-2 leading-tight hover:text-primary">{product.name}</h3>
-                      </Link>
-
-                      {renderStars(product.rating)}
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-bold text-lg">{formatPrice(product.price)}</div>
-                          {product.originalPrice && (
-                            <div className="text-xs text-gray-500 line-through">{formatPrice(product.originalPrice)}</div>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-500">{product.stock} in stock</div>
-                      </div>
-
-                      <Button className="w-full" size="sm">
-                        ADD
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <UniversalProductCard key={product.id} product={product as any} size={viewMode === 'grid' ? 'md' : 'lg'} variant="market" />
               ))}
             </div>
           )}

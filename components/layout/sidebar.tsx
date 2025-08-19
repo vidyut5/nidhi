@@ -72,9 +72,9 @@ export function Sidebar({ className }: SidebarProps) {
       icon: MessageSquare,
     },
     {
-      title: "Guidelines",
+      title: "State Info",
       href: "/guidelines",
-      icon: HelpCircle,
+      icon: Building2,
     },
     {
       title: "Trending",

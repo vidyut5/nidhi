@@ -1,11 +1,12 @@
 "use client"
 
-import { UploadButton } from "@uploadthing/react"
+import { UploadButton as UTUploadButton } from "@uploadthing/react"
 import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
 export function AttachmentsUploader({ onChange, inputName, defaultValue }: { onChange?: (files: { url: string; name?: string; type?: string; size?: number }[]) => void; inputName?: string; defaultValue?: string }) {
+  const AnyUploadButton = UTUploadButton as unknown as React.ComponentType<any>
   return (
-    <UploadButton<OurFileRouter, "guidelineAttachment">
+    <AnyUploadButton
       className="ut-button"
       endpoint="guidelineAttachment"
       onClientUploadComplete={(res: Array<{ url: string; name: string; type: string; size: number }> | undefined) => {

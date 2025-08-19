@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ProductCard as UniversalProductCard } from '@/components/product/product-card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -122,25 +123,7 @@ export default function SellerProductsCatalog() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {visible.map(p => (
-            <Card key={p.id} className="group hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <Link href={`/product/${p.slug}`}>
-                  <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-3">
-                    <Image src={p.imageUrl || '/product-1.jpg'} alt={p.name} fill className="object-cover" />
-                  </div>
-                  <div className="space-y-1">
-                    {p.brand && <div className="text-xs text-muted-foreground uppercase">{p.brand}</div>}
-                    <div className="font-medium line-clamp-2">{p.name}</div>
-                    <div className="flex items-center gap-2">
-                      <div className="font-semibold">{formatPrice(p.price)}</div>
-                      {typeof p.reviewCount === 'number' && p.reviewCount > 0 && (
-                        <Badge variant="secondary" className="text-xs">{p.reviewCount} reviews</Badge>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              </CardContent>
-            </Card>
+            <UniversalProductCard key={p.id} product={{ ...p, images: p.images ?? (p.imageUrl ? [p.imageUrl] : []) } as any} size="md" variant="market" />
           ))}
         </div>
       )}

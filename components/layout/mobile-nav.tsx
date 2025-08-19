@@ -2,76 +2,51 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Home, Search, User, Store, ShoppingBag } from 'lucide-react'
-import { cn } from '@/lib/utils'
+
+function cx(...cls: Array<string | false | undefined>) {
+  return cls.filter(Boolean).join(' ')
+}
+
+type Item = { href: string; label: string; icon: string }
 
 export function MobileNav() {
   const pathname = usePathname()
-  // simplified nav; no badges
 
-  const navItems = [
-    {
-      name: 'Home',
-      href: '/',
-      icon: Home,
-    },
-    {
-      name: 'Search',
-      href: '/search',
-      icon: Search,
-    },
-    {
-      name: 'Sell',
-      href: '/sell',
-      icon: Store,
-    },
-    {
-      name: 'Orders',
-      href: '/orders',
-      icon: ShoppingBag,
-    },
-    {
-      name: 'Profile',
-      href: '/profile',
-      icon: User,
-    },
+  const items: Item[] = [
+    { href: '/', label: 'Home', icon: 'home' },
+    { href: '/search', label: 'Search', icon: 'search' },
+    { href: '/sell', label: 'Sell', icon: 'storefront' },
+    { href: '/orders', label: 'Orders', icon: 'inventory_2' },
+    { href: '/profile', label: 'Profile', icon: 'person' },
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 lg:hidden shadow-lg" role="navigation" aria-label="Mobile primary navigation">
-      <div className="grid grid-cols-5 h-16 px-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href
-          const Icon = item.icon
-
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              aria-label={item.name}
-              aria-current={isActive ? 'page' : undefined}
-              className={cn(
-                "flex flex-col items-center justify-center gap-1 px-1 py-3 rounded-xl transition-all duration-200 mx-1 my-2 relative",
-                isActive 
-                  ? "text-blue-600 bg-blue-50 shadow-sm" 
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              )}
-            >
-              <Icon className={cn("h-5 w-5", isActive && "scale-110")}/>
-              <span className={cn(
-                "text-[11px] font-medium leading-none",
-                isActive && "font-semibold"
-              )}>
-                {item.name}
-              </span>
-            </Link>
-          )
-        })}
+    <nav
+      role="navigation"
+      aria-label="Primary"
+      className={cx(
+        'fixed inset-x-0 bottom-0 z-50 border-t bg-white lg:hidden',
+        'pb-[env(safe-area-inset-bottom)]'
+      )}
+    >
+      <div className="mx-auto max-w-lg px-3 py-3">
+        <div className="grid grid-cols-5 gap-1 rounded-2xl bg-white p-2 border shadow-sm">
+          {items.map((it) => {
+            const active = it.href === '/' ? pathname === '/' : pathname.startsWith(it.href)
+            return (
+              <Link key={it.href} href={it.href} aria-current={active ? 'page' : undefined} className="group">
+                <div className={cx('relative flex h-10 items-center justify-center gap-2 rounded-full px-3 transition-colors')}>
+                  {active && <span aria-hidden className="absolute inset-0 rounded-full bg-primary/15" />}
+                  <span aria-hidden className={cx('material-symbols-rounded text-[22px] relative', active ? 'msr-filled text-primary' : 'text-muted-foreground')}>
+                    {it.icon}
+                  </span>
+                  <span className={cx('relative text-[11px] font-medium', active ? 'text-foreground' : 'text-muted-foreground')}>{it.label}</span>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
       </div>
-      
-      {/* Safe area for devices with home indicator */}
-      <div className="h-4 bg-white/95"></div>
-    </div>
+    </nav>
   )
 }
