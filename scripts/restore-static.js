@@ -37,7 +37,10 @@ excludeDirs.forEach(dir => {
 // Restore excluded files
 const excludeFiles = [
   'lib/prisma.ts',
-  'lib/admin-session.ts'
+  'lib/admin-session.ts',
+  'lib/seed-demo.ts',
+  'app/orders/page.tsx',
+  'lib/auth.ts'
 ];
 
 excludeFiles.forEach(file => {

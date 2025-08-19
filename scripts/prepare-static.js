@@ -9,7 +9,7 @@ if (!fs.existsSync(backupDir)) {
 }
 
 const excludeDirs = ['app/api', 'app/admin', 'prisma', 'scripts'];
-const excludeFiles = ['lib/prisma.ts', 'lib/admin-session.ts', 'app/orders/page.tsx', 'lib/auth.ts'];
+const excludeFiles = ['lib/prisma.ts', 'lib/admin-session.ts', 'lib/seed-demo.ts', 'app/orders/page.tsx', 'lib/auth.ts'];
 
 excludeDirs.forEach(dir => {
   const sourcePath = path.join(process.cwd(), dir);
