@@ -1,5 +1,3 @@
-"use client"
-
 import { Suspense } from 'react'
 import CategoryListing from '@/components/category/category-listing'
 import { demoCategories } from '@/lib/demo-data'
