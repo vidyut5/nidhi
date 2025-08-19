@@ -1,33 +1,30 @@
-This is a [Next.js](https://nextjs.org) project.
+# Vidyut - India's Largest Electricity Information Platform
+
+A comprehensive B2B, D2C, and C2C electrical marketplace platform for the Indian electrical industry.
+
+## Features
+
+- **Electrical Marketplace**: Browse and source electrical products from verified suppliers
+- **State Electricity Board Information**: Comprehensive profiles of power generators, transmission lines, and distribution companies
+- **Seller Management**: Complete seller profiles with verification systems
+- **Product Catalog**: Extensive electrical product database with detailed specifications
+- **Mobile-First Design**: Responsive design optimized for all devices
+- **Admin Panel**: Comprehensive backend management system
+
+## Technology Stack
+
+- **Frontend**: Next.js 14, React, TypeScript
+- **Styling**: Tailwind CSS, shadcn/ui components
+- **Backend**: Appwrite (Database, Authentication, Storage)
+- **Deployment**: GitHub Pages, Appwrite Pages
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables
+4. Run development server: `npm run dev`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## License
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Environment
-
-Create `.env.local` with your Appwrite credentials:
-
-```
-APPWRITE_ENDPOINT=https://fra.cloud.appwrite.io/v1
-APPWRITE_PROJECT_ID=689d8acd003e5d0b00b0
-APPWRITE_API_KEY=YOUR_SERVER_KEY
-```
-
-These are used by `lib/appwrite.ts` to connect the server SDK.
+Proprietary - All rights reserved.
