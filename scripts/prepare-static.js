@@ -14,11 +14,7 @@ const excludeDirs = [
 // Files to exclude from static export
 const excludeFiles = [
   'lib/prisma.ts',
-  'lib/admin-session.ts'
-];
-
-// Files that need to be modified to remove server-side imports
-const modifyFiles = [
+  'lib/admin-session.ts',
   'app/orders/page.tsx',
   'lib/auth.ts'
 ];
@@ -58,51 +54,6 @@ excludeFiles.forEach(file => {
     }
     fs.renameSync(sourcePath, backupPath);
     console.log(`✅ Backed up ${file}`);
-  }
-});
-
-// Modify files to remove server-side imports
-modifyFiles.forEach(file => {
-  const filePath = path.join(process.cwd(), file);
-  const backupPath = path.join(process.cwd(), backupDir, file);
-  
-  if (fs.existsSync(filePath)) {
-    console.log(`📝 Modifying ${file}...`);
-    
-    // Create backup
-    if (!fs.existsSync(path.dirname(backupPath)) {
-      fs.mkdirSync(path.dirname(backupPath), { recursive: true });
-    }
-    fs.copyFileSync(filePath, backupPath);
-    
-    // Read and modify content
-    let content = fs.readFileSync(filePath, 'utf8');
-    
-    // Remove prisma imports and related code
-    content = content.replace(/import\s*{\s*prisma\s*}\s*from\s*['"]@\/lib\/prisma['"];?\s*/g, '');
-    content = content.replace(/import\s*{\s*prisma\s*}\s*from\s*['"]@\/lib\/prisma['"];?\s*/g, '');
-    
-    // Replace prisma calls with mock data or safe defaults
-    if (file.includes('orders/page.tsx')) {
-      // Replace prisma calls with mock data for orders page
-      content = content.replace(/const\s+purchases\s*=\s*await\s+prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'const purchases = []');
-      content = content.replace(/purchases\?\./g, 'purchases.');
-      content = content.replace(/purchases\s*\?\s*\./g, 'purchases.');
-    }
-    
-    if (file.includes('auth.ts')) {
-      // Replace prisma calls with mock data for auth
-      content = content.replace(/await\s+prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'null');
-      content = content.replace(/prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'null');
-    }
-    
-    // Remove any remaining prisma usage
-    content = content.replace(/prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'null');
-    content = content.replace(/await\s+prisma\.[a-zA-Z]+\.[a-zA-Z]+\([^)]*\)/g, 'null');
-    
-    // Write modified content
-    fs.writeFileSync(filePath, content);
-    console.log(`✅ Modified ${file}`);
   }
 });
 
