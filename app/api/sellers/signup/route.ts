@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcrypt'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { BusinessType } from '@prisma/client'
 
 export async function POST(req: Request) {
   try {
@@ -38,19 +39,19 @@ export async function POST(req: Request) {
       where: { userId: user.id },
       update: {
         businessName: String(biz?.businessName || '').trim() || null,
-        businessType: String(biz?.businessType || '').trim() || null,
+        businessType: (String(biz?.businessType || '').trim() || null) as BusinessType,
         gstNumber: String(biz?.gstNumber || '').trim() || null,
         businessAddress: String(biz?.address || '').trim() || null,
-        verificationStatus: 'pending',
+        verificationStatus: 'PENDING',
         kycDocs: JSON.stringify(docs),
       },
       create: {
         userId: user.id,
         businessName: String(biz?.businessName || '').trim() || null,
-        businessType: String(biz?.businessType || '').trim() || null,
+        businessType: (String(biz?.businessType || '').trim() || null) as BusinessType,
         gstNumber: String(biz?.gstNumber || '').trim() || null,
         businessAddress: String(biz?.address || '').trim() || null,
-        verificationStatus: 'pending',
+        verificationStatus: 'PENDING',
         kycDocs: JSON.stringify(docs),
       },
     })

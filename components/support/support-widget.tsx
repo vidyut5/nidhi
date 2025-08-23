@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Send, MessageSquare, Phone, Mail, Settings, Trash2, X } from 'lucide-react'
 import { ChatSidebar } from '@/components/messages/chat-sidebar'
+import { logger } from '@/lib/logger'
 
 type ContactInfo = { name?: string; email?: string; phone?: string }
 
@@ -41,7 +42,7 @@ export function SupportWidget({
         const data = await res.json()
         if (active) setThread(data)
       } catch (err) {
-        console.error('Failed to load messages', err)
+        logger.error('Failed to load messages', err instanceof Error ? err : undefined, { orderId, target })
       }
     }
     load()
@@ -84,7 +85,7 @@ export function SupportWidget({
       setText(content)
       // mark optimistic as failed (remove or annotate)
       setThread(prev => prev.filter(m => m.id !== optimistic.id))
-      console.error('Failed to send message', err)
+      logger.error('Failed to send message', err instanceof Error ? err : undefined, { orderId, target, content })
     }
   }
 

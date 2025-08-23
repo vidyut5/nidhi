@@ -23,8 +23,22 @@ export default function EnterpriseProfileEditPage() {
     e.preventDefault()
     setSaving(true)
     try {
-      // TODO: connect to enterprise profile API
-      await new Promise(r => setTimeout(r, 600))
+      const response = await fetch('/api/enterprise/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to save profile')
+      }
+      
+      // Redirect to profile page on success
+      window.location.href = '/enterprise/profile'
+    } catch (error) {
+      console.error('Failed to save profile:', error)
+      alert(error instanceof Error ? error.message : 'Failed to save profile')
     } finally {
       setSaving(false)
     }

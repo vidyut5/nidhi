@@ -118,7 +118,7 @@ export async function POST(req: Request) {
           totalAmount,
           taxAmount,
           shippingCost,
-          paymentStatus: 'pending',
+          paymentStatus: 'PENDING',
           shippingAddress: JSON.stringify(shippingAddress),
           buyerId: session.user.id,
           items: {

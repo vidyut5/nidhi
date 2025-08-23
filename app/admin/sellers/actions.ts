@@ -29,14 +29,14 @@ async function assertAdmin() {
 
 export async function approveSeller(sellerProfileId: string) {
   await assertAdmin()
-  const s = await prisma.sellerProfile.update({ where: { id: sellerProfileId }, data: { verificationStatus: 'verified' }, include: { user: true } })
+  const s = await prisma.sellerProfile.update({ where: { id: sellerProfileId }, data: { verificationStatus: 'VERIFIED' }, include: { user: true } })
   await notifySellerApproval(s.user.email, true)
   revalidatePath('/admin/sellers')
 }
 
 export async function rejectSeller(sellerProfileId: string) {
   await assertAdmin()
-  const s = await prisma.sellerProfile.update({ where: { id: sellerProfileId }, data: { verificationStatus: 'rejected' }, include: { user: true } })
+  const s = await prisma.sellerProfile.update({ where: { id: sellerProfileId }, data: { verificationStatus: 'REJECTED' }, include: { user: true } })
   await notifySellerApproval(s.user.email, false)
   revalidatePath('/admin/sellers')
 }

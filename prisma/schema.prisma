@@ -17,6 +17,33 @@ enum Role {
   SELLER
 }
 
+enum OrderStatus {
+  PROCESSING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum BusinessType {
+  INDIVIDUAL
+  ENTERPRISE
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
 model User {
   id              String         @id @default(cuid())
   email           String         @unique
@@ -42,19 +69,25 @@ model User {
   searchHistory   SearchHistory[]
   kycDocs         String?
   guidelines      Guideline[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isVerified])
+  @@index([createdAt])
+  @@index([tier])
 }
 
 model SellerProfile {
   id              String    @id @default(cuid())
   businessName    String?
-  businessType    String?   // Individual, Enterprise
+  businessType    BusinessType?   // Individual, Enterprise
   gstNumber       String?
   businessAddress String?
   bankDetails     String?   // Encrypted
   storeBanner     String?
   storeDescription String?
   isEnterprise    Boolean   @default(false)
-  verificationStatus String @default("pending") // pending, verified, rejected
+  verificationStatus VerificationStatus @default(PENDING)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   user            User      @relation(fields: [userId], references: [id])
@@ -74,6 +107,10 @@ model Category {
   products    Product[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  @@index([parentId])
+  @@index([slug])
+  @@index([createdAt])
 }
 
 model Product {
@@ -113,20 +150,28 @@ model Product {
   orderItems    OrderItem[]
   reviews       Review[]
   wishlistItems WishlistItem[]
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([createdAt])
+  @@index([price])
+  @@index([stock])
 }
 
 model Order {
   id             String      @id @default(cuid())
   orderNumber    String      @unique
-  status         String      @default("processing") // processing, confirmed, shipped, delivered, cancelled, returned
+  status         OrderStatus @default(PROCESSING)
   totalAmount    Float
   shippingCost   Float       @default(0)
   taxAmount      Float       @default(0)
   discountAmount Float       @default(0)
-  paymentStatus  String      @default("pending") // pending, paid, failed, refunded
+  paymentStatus  PaymentStatus @default(PENDING)
   paymentMethod  String?
-  shippingAddress String     // JSON object
-  billingAddress String?     // JSON object
+  shippingAddress String     // JSON string
+  billingAddress String?     // JSON string
   trackingNumber String?
   estimatedDelivery DateTime?
   deliveredAt    DateTime?
@@ -136,6 +181,11 @@ model Order {
   buyer          User        @relation(fields: [buyerId], references: [id])
   buyerId        String
   items          OrderItem[]
+
+  @@index([buyerId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -149,6 +199,9 @@ model OrderItem {
   orderId   String
   product   Product  @relation(fields: [productId], references: [id])
   productId String
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 model Review {
@@ -156,7 +209,7 @@ model Review {
   rating    Int      // 1-5
   title     String?
   comment   String?
-  images    String?  // JSON array of image URLs
+  images    String?  // JSON string of image URLs
   isVerified Boolean @default(false)
   helpfulCount Int   @default(0)
   createdAt DateTime @default(now())
@@ -167,6 +220,10 @@ model Review {
   userId    String
   
   @@unique([productId, userId]) // One review per user per product
+  @@index([productId])
+  @@index([userId])
+  @@index([rating])
+  @@index([createdAt])
 }
 
 model WishlistItem {
@@ -196,7 +253,7 @@ model Guideline {
   state     String
   city      String?
   category  String?
-  attachments String? // JSON array of { url, name, type, size }
+  attachments String? // JSON string of { url, name, type, size }
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

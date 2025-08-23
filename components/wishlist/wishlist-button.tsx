@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useWishlistStore } from '@/lib/wishlist-store'
 import { Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 
 interface Product {
   id: string
@@ -68,7 +69,7 @@ export function WishlistButton({
         })
       }
     } catch (error) {
-      console.error('Error toggling wishlist:', error)
+      logger.error('Error toggling wishlist', error instanceof Error ? error : undefined, { productId: product?.id })
     } finally {
       setTimeout(() => setIsAnimating(false), 300)
     }

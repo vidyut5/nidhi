@@ -2,36 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-export interface CartItem {
-  id: string
-  name: string
-  slug: string
-  price: number
-  originalPrice?: number
-  imageUrl: string
-  brand?: string
-  quantity: number
-  stock: number
-  sellerId: string
-  sellerName: string
-}
-
-interface CartStore {
-  items: CartItem[]
-  isOpen: boolean
-  totalItems: number
-  totalPrice: number
-  
-  // Actions
-  addItem: (product: Omit<CartItem, 'quantity'>) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
-  clearCart: () => void
-  openCart: () => void
-  closeCart: () => void
-  toggleCart: () => void
-}
+import type { CartItem, CartStore } from '@/types/product'
 
 export const useCartStore = create<CartStore>()(
   persist(

@@ -1,0 +1,383 @@
+// Production Prisma Schema
+// This is the production-ready version of your database schema
+// Optimized for PostgreSQL with proper indexing and constraints
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // Connection pooling for production
+  directUrl = env("DATABASE_DIRECT_URL") // Optional: for migrations
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+  SELLER
+}
+
+enum OrderStatus {
+  PROCESSING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum BusinessType {
+  INDIVIDUAL
+  ENTERPRISE
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id              String         @id @default(cuid())
+  email           String         @unique @db.VarChar(255)
+  name            String?        @db.VarChar(100)
+  password        String         @db.VarChar(255)
+  avatar          String?        @db.VarChar(500)
+  bio             String?        @db.Text
+  location        String?        @db.VarChar(200)
+  phone           String?        @db.VarChar(15)
+  isVerified      Boolean        @default(false)
+  tier            String         @default("Bronze") @db.VarChar(20)
+  role            Role           @default(USER)
+  totalSales      Decimal        @default(0) @db.Decimal(10, 2)
+  totalOrders     Int            @default(0)
+  rating          Decimal        @default(0) @db.Decimal(3, 2)
+  createdAt       DateTime       @default(now()) @db.Timestamptz
+  updatedAt       DateTime       @updatedAt @db.Timestamptz
+  lastLoginAt     DateTime?      @db.Timestamptz
+  
+  // Relationships
+  products        Product[]
+  orders          Order[]
+  reviews         Review[]
+  wishlistItems   WishlistItem[]
+  sellerProfile   SellerProfile?
+  searchHistory   SearchHistory[]
+  kycDocs         String?        @db.Text
+  guidelines      Guideline[]
+  sessions        UserSession[]
+  
+  // Indexes for performance
+  @@index([email])
+  @@index([role])
+  @@index([isVerified])
+  @@index([createdAt])
+  @@index([tier])
+  @@index([phone])
+  @@index([lastLoginAt])
+  @@map("users")
+}
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String
+  sessionId String   @unique @db.VarChar(128)
+  expiresAt DateTime @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  ipAddress String?  @db.VarChar(45)
+  userAgent String?  @db.Text
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([sessionId])
+  @@index([expiresAt])
+  @@map("user_sessions")
+}
+
+model SellerProfile {
+  id                 String             @id @default(cuid())
+  businessName       String?            @db.VarChar(200)
+  businessType       BusinessType?
+  gstNumber          String?            @unique @db.VarChar(15)
+  businessAddress    String?            @db.Text
+  bankDetails        String?            @db.Text // Encrypted
+  storeBanner        String?            @db.VarChar(500)
+  storeDescription   String?            @db.Text
+  isEnterprise       Boolean            @default(false)
+  verificationStatus VerificationStatus @default(PENDING)
+  verificationDocs   String?            @db.Text // JSON array of document URLs
+  createdAt          DateTime           @default(now()) @db.Timestamptz
+  updatedAt          DateTime           @updatedAt @db.Timestamptz
+  
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  
+  @@index([verificationStatus])
+  @@index([isEnterprise])
+  @@index([gstNumber])
+  @@map("seller_profiles")
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String     @unique @db.VarChar(100)
+  slug        String     @unique @db.VarChar(120)
+  description String?    @db.Text
+  imageUrl    String?    @db.VarChar(500)
+  parentId    String?
+  isActive    Boolean    @default(true)
+  sortOrder   Int        @default(0)
+  seoTitle    String?    @db.VarChar(200)
+  seoDescription String? @db.VarChar(300)
+  createdAt   DateTime   @default(now()) @db.Timestamptz
+  updatedAt   DateTime   @updatedAt @db.Timestamptz
+  
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+  
+  @@index([parentId])
+  @@index([slug])
+  @@index([createdAt])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("categories")
+}
+
+model Product {
+  id               String         @id @default(cuid())
+  name             String         @db.VarChar(200)
+  slug             String         @unique @db.VarChar(220)
+  description      String         @db.Text
+  shortDescription String?        @db.VarChar(500)
+  price            Decimal        @db.Decimal(10, 2)
+  originalPrice    Decimal?       @db.Decimal(10, 2)
+  imageUrls        String         @db.Text // JSON array of image URLs
+  brand            String?        @db.VarChar(100)
+  model            String?        @db.VarChar(100)
+  sku              String?        @unique @db.VarChar(100)
+  stock            Int            @default(0)
+  minOrder         Int            @default(1)
+  maxOrder         Int?
+  isActive         Boolean        @default(true)
+  isFeatured       Boolean        @default(false)
+  weight           Decimal?       @db.Decimal(8, 2)
+  dimensions       String?        @db.Text // JSON: {length, width, height}
+  colors           String?        @db.Text // JSON array
+  sizes            String?        @db.Text // JSON array
+  specifications   String?        @db.Text // JSON object
+  warranty         String?        @db.VarChar(200)
+  returnPolicy     String?        @db.Text
+  tags             String?        @db.Text // JSON array
+  views            Int            @default(0)
+  salesCount       Int            @default(0)
+  rating           Decimal        @default(0) @db.Decimal(3, 2)
+  reviewCount      Int            @default(0)
+  seoTitle         String?        @db.VarChar(200)
+  seoDescription   String?        @db.VarChar(300)
+  createdAt        DateTime       @default(now()) @db.Timestamptz
+  updatedAt        DateTime       @updatedAt @db.Timestamptz
+  
+  seller        User           @relation(fields: [sellerId], references: [id])
+  sellerId      String
+  category      Category       @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  orderItems    OrderItem[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+  
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([createdAt])
+  @@index([price])
+  @@index([stock])
+  @@index([slug])
+  @@index([brand])
+  @@index([rating])
+  @@index([salesCount])
+  @@fulltext([name, description])
+  @@map("products")
+}
+
+model Order {
+  id                String        @id @default(cuid())
+  orderNumber       String        @unique @db.VarChar(50)
+  status            OrderStatus   @default(PROCESSING)
+  totalAmount       Decimal       @db.Decimal(10, 2)
+  shippingCost      Decimal       @default(0) @db.Decimal(8, 2)
+  taxAmount         Decimal       @default(0) @db.Decimal(8, 2)
+  discountAmount    Decimal       @default(0) @db.Decimal(8, 2)
+  paymentStatus     PaymentStatus @default(PENDING)
+  paymentMethod     String?       @db.VarChar(50)
+  paymentId         String?       @db.VarChar(100)
+  shippingAddress   String        @db.Text // JSON string
+  billingAddress    String?       @db.Text // JSON string
+  trackingNumber    String?       @db.VarChar(100)
+  estimatedDelivery DateTime?     @db.Timestamptz
+  deliveredAt       DateTime?     @db.Timestamptz
+  cancelledAt       DateTime?     @db.Timestamptz
+  notes             String?       @db.Text
+  createdAt         DateTime      @default(now()) @db.Timestamptz
+  updatedAt         DateTime      @updatedAt @db.Timestamptz
+  
+  buyer User        @relation(fields: [buyerId], references: [id])
+  buyerId String
+  items OrderItem[]
+  
+  @@index([buyerId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@index([orderNumber])
+  @@index([trackingNumber])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2) // Price at time of order
+  color     String?  @db.VarChar(50)
+  size      String?  @db.VarChar(50)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      @db.SmallInt
+  title     String?  @db.VarChar(200)
+  comment   String?  @db.Text
+  isVerified Boolean @default(false)
+  isApproved Boolean @default(false)
+  helpful   Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  
+  @@index([productId])
+  @@index([userId])
+  @@index([rating])
+  @@index([isApproved])
+  @@index([createdAt])
+  @@map("reviews")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @db.Timestamptz
+  
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@map("wishlist_items")
+}
+
+model SearchHistory {
+  id        String   @id @default(cuid())
+  query     String   @db.VarChar(200)
+  results   Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@index([query])
+  @@map("search_history")
+}
+
+model Guideline {
+  id          String   @id @default(cuid())
+  title       String   @db.VarChar(200)
+  content     String   @db.Text
+  category    String   @db.VarChar(100)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  attachments String?  @db.Text // JSON array
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+  
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+  
+  @@index([category])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@index([authorId])
+  @@map("guidelines")
+}
+
+// Performance and analytics tables
+model ProductView {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String?
+  ipAddress String?  @db.VarChar(45)
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now()) @db.Timestamptz
+  
+  @@index([productId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("product_views")
+}
+
+model SystemLog {
+  id        String   @id @default(cuid())
+  level     String   @db.VarChar(20)
+  message   String   @db.Text
+  meta      String?  @db.Text // JSON
+  userId    String?
+  ipAddress String?  @db.VarChar(45)
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now()) @db.Timestamptz
+  
+  @@index([level])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("system_logs")
+}
+
+// Cache table for frequently accessed data
+model CacheEntry {
+  key       String   @id @db.VarChar(255)
+  value     String   @db.Text
+  expiresAt DateTime @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+  
+  @@index([expiresAt])
+  @@map("cache_entries")
+}

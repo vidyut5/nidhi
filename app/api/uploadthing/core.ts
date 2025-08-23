@@ -1,6 +1,33 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logger } from '@/lib/logger';
+
+// Allowed file types for security
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+const ALLOWED_DOCUMENT_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']
+const MAX_FILE_SIZE = 8 * 1024 * 1024 // 8MB
+
+// File type validation
+function isValidFileType(file: { type: string }, allowedTypes: string[]): boolean {
+  return allowedTypes.includes(file.type)
+}
+
+// File size validation
+function isValidFileSize(file: { size: number }, maxSize: number): boolean {
+  return file.size <= maxSize
+}
+
+// File name validation (prevent path traversal attacks)
+function isValidFileName(fileName: string): boolean {
+  const dangerousPatterns = [
+    /\.\./, // Path traversal
+    /[<>:"|?*]/, // Invalid characters
+    /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i, // Reserved names
+  ]
+  
+  return !dangerousPatterns.some(pattern => pattern.test(fileName))
+}
 
 async function verifyAdminCookieFromRequest(req: Request): Promise<string | null> {
   try {
@@ -34,7 +61,12 @@ const f = createUploadthing();
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
   // Define as many FileRoutes as you like, each with a unique route slug
-  productImage: f({ image: { maxFileSize: "4MB" } })
+  productImage: f({ 
+    image: { 
+      maxFileSize: "4MB",
+      maxFileCount: 10
+    } 
+  })
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
       // Allow either authenticated user via next-auth or an active admin session
@@ -50,15 +82,33 @@ export const ourFileRouter = {
         if (!userId) {
           throw new Error('Missing or invalid userId in upload metadata')
         }
+        
+        // Additional security checks
+        if (!isValidFileType(file, ALLOWED_IMAGE_TYPES)) {
+          throw new Error('Invalid file type for product image')
+        }
+        
+        if (!isValidFileSize(file, MAX_FILE_SIZE)) {
+          throw new Error('File size exceeds limit')
+        }
+        
+        if (!isValidFileName(file.name)) {
+          throw new Error('Invalid file name')
+        }
+        
         // Optionally persist a reference in DB here
         // await prisma.asset.create({ data: { userId, url: file.url } })
-        console.info('upload complete', { userId, fileId: file.key })
+        logger.info('Product image upload completed', { userId, fileId: file.key, fileName: file.name, fileSize: file.size })
       } catch (err) {
-        console.error('uploadthing onUploadComplete error', err)
+        logger.error('Product image upload failed', err instanceof Error ? err : undefined, { fileId: file.key, fileName: file.name })
         throw err
       }
     }),
-  guidelineAttachment: f({ image: { maxFileSize: "8MB" }, blob: { maxFileSize: "8MB" } })
+    
+  guidelineAttachment: f({ 
+    image: { maxFileSize: "8MB" }, 
+    blob: { maxFileSize: "8MB" } 
+  })
     .middleware(async ({ req }) => {
       const adminId = await verifyAdminCookieFromRequest(req as unknown as Request)
       if (adminId) return { userId: adminId }
@@ -70,9 +120,24 @@ export const ourFileRouter = {
       try {
         const userId = typeof metadata?.userId === 'string' ? metadata.userId : ''
         if (!userId) throw new Error('Missing or invalid userId in upload metadata')
-        console.info('guideline upload complete', { userId, fileId: file.key })
+        
+        // Additional security checks for guideline attachments
+        const allowedTypes = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_DOCUMENT_TYPES]
+        if (!isValidFileType(file, allowedTypes)) {
+          throw new Error('Invalid file type for guideline attachment')
+        }
+        
+        if (!isValidFileSize(file, MAX_FILE_SIZE)) {
+          throw new Error('File size exceeds limit')
+        }
+        
+        if (!isValidFileName(file.name)) {
+          throw new Error('Invalid file name')
+        }
+        
+        logger.info('Guideline attachment upload completed', { userId, fileId: file.key, fileName: file.name, fileSize: file.size })
       } catch (err) {
-        console.error('uploadthing guidelineAttachment onUploadComplete error', err)
+        logger.error('Guideline attachment upload failed', err instanceof Error ? err : undefined, { fileId: file.key, fileName: file.name })
         throw err
       }
     }),

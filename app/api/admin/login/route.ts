@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import { addAdminSession } from '@/lib/admin-session'
+import { loginRateLimiter } from '@/lib/rate-limiter'
+import { verifyPassword } from '@/lib/auth-utils'
+import { logger } from '@/lib/logger'
 
 function base64url(input: Buffer | string) {
   const buf = Buffer.isBuffer(input) ? input : Buffer.from(input)
@@ -29,6 +32,18 @@ function timingSafeEqualStrings(a: string, b: string) {
 
 export async function POST(req: Request) {
   try {
+    // Rate limiting by IP address
+    const forwarded = req.headers.get('x-forwarded-for')
+    const ip = forwarded ? forwarded.split(',')[0] : 'unknown'
+    
+    try {
+      if (!loginRateLimiter.isAllowed(ip)) {
+        return NextResponse.json({ error: 'Too many login attempts. Please try again later.' }, { status: 429 })
+      }
+    } catch (rateLimitError) {
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+    }
+
     let body: unknown
     try {
       body = await req.json()
@@ -63,7 +78,14 @@ export async function POST(req: Request) {
     }
     const sessionSecret = process.env.ADMIN_SESSION_SECRET
     if (!envUsername || !envPasswordHash || !sessionSecret) {
-      console.error('Missing admin env config. Required: ADMIN_USERNAME, ADMIN_PASSWORD_HASH, ADMIN_SESSION_SECRET')
+      logger.error('Missing admin env config', undefined, {
+        required: ['ADMIN_USERNAME', 'ADMIN_PASSWORD_HASH', 'ADMIN_SESSION_SECRET'],
+        present: {
+          username: !!envUsername,
+          passwordHash: !!envPasswordHash,
+          sessionSecret: !!sessionSecret
+        }
+      })
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
     }
 
@@ -72,12 +94,10 @@ export async function POST(req: Request) {
       timingSafeEqualStrings(u, envUserTrim) ||
       u === envUserTrim ||
       u.toLowerCase() === envUserTrim.toLowerCase()
-    const passwordOk = await bcrypt.compare(p, envPasswordHash)
-    const devCheckOk = process.env.NODE_ENV !== 'production' ? await bcrypt.compare('VidyutAdmin123_', envPasswordHash) : undefined
+    const passwordOk = await verifyPassword(p, envPasswordHash)
+    
     if (!usernameOk || !passwordOk) {
-      // Dev-only debug info
-      const bodyDebug = process.env.NODE_ENV !== 'production' ? { usernameOk, passwordOk, u, envUserTrim, hashLen: envPasswordHash.length, devCheckOk, hashPreview: envPasswordHash.slice(0, 10) } : {}
-      return NextResponse.json({ ok: false, ...bodyDebug }, { status: 401 })
+      return NextResponse.json({ ok: false }, { status: 401 })
     }
 
     const now = Math.floor(Date.now() / 1000)
@@ -85,9 +105,9 @@ export async function POST(req: Request) {
     const jti = crypto.randomUUID()
     const jwt = signJwtHS256({ sub: 'admin', iat: now, exp: now + expiresInSeconds, jti }, sessionSecret)
 
-    addAdminSession(jti, expiresInSeconds)
+    const { jti: sessionJti, csrfToken } = addAdminSession(jti, expiresInSeconds)
 
-    const res = NextResponse.json({ ok: true })
+    const res = NextResponse.json({ ok: true, csrfToken })
     const cookieParts = [
       `admin_session=${jwt}`,
       'Path=/',
@@ -99,7 +119,7 @@ export async function POST(req: Request) {
     res.headers.append('Set-Cookie', cookieParts.join('; '))
     return res
   } catch (err) {
-    console.error('Admin login error', err)
+    logger.error('Admin login error', err instanceof Error ? err : undefined, { error: err })
     return new NextResponse('Bad Request', { status: 400 })
   }
 }

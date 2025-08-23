@@ -2,64 +2,26 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { productSchema, validateInput } from "@/lib/validation";
+import { handleApiError, ValidationError, AuthenticationError } from "@/lib/error-handler";
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      throw new AuthenticationError();
     }
 
     const raw = await req.json();
-    const nameRaw = typeof raw?.name === 'string' ? raw.name : '';
-    const descriptionRaw = typeof raw?.description === 'string' ? raw.description : '';
-    const priceRaw = raw?.price;
-    const imageUrlsRaw = raw?.imageUrls;
-    const categoryIdRaw = raw?.categoryId;
-
-    const name = nameRaw.trim();
-    const description = descriptionRaw.trim();
-    if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
-    if (!description) return NextResponse.json({ error: 'Description is required' }, { status: 400 });
-
-    const priceNum = typeof priceRaw === 'number' ? priceRaw : Number(priceRaw);
-    if (!Number.isFinite(priceNum) || priceNum <= 0) {
-      return NextResponse.json({ error: 'Price must be a number greater than 0' }, { status: 400 });
+    
+    // Validate input using Zod schema
+    const validation = validateInput(productSchema, raw);
+    if (!validation.success) {
+      throw new ValidationError('Invalid product data', validation.errors);
     }
 
-    // Normalize imageUrls to string[] and validate each URL
-    const toArray = (val: unknown): unknown[] => Array.isArray(val) ? val : (val == null ? [] : [val]);
-    const imagesNormalized = toArray(imageUrlsRaw)
-      .filter((v): v is string => typeof v === 'string')
-      .map((u) => u.trim())
-      .filter((u) => u.length > 0);
-    const isValidUrl = (input: string) => {
-      try {
-        if (typeof input !== 'string') return false;
-        const u = input.trim();
-        if (u.length === 0 || u.length > 2048) return false;
-        if (u.startsWith('/')) {
-          // Relative paths to public assets are allowed
-          return !u.startsWith('//');
-        }
-        const url = new URL(u);
-        if (!url.hostname) return false;
-        const protocol = url.protocol.toLowerCase();
-        if (protocol !== 'http:' && protocol !== 'https:') return false;
-        return true;
-      } catch {
-        return false;
-      }
-    };
-    if (imagesNormalized.length === 0 || !imagesNormalized.every(isValidUrl)) {
-      return NextResponse.json({ error: 'imageUrls must contain valid URLs' }, { status: 400 });
-    }
-
-    const categoryId = typeof categoryIdRaw === 'string' ? categoryIdRaw : String(categoryIdRaw ?? '');
-    if (!categoryId) {
-      return NextResponse.json({ error: 'categoryId is required' }, { status: 400 });
-    }
+    const { name, description, price, imageUrls, categoryId, ...otherFields } = validation.data;
 
     // Generate a unique slug from the trimmed name
     const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `product-${Date.now()}`;
@@ -90,10 +52,25 @@ export async function POST(req: Request) {
             name,
             slug,
             description,
-            price: priceNum,
-            imageUrls: JSON.stringify(imagesNormalized),
+            price,
+            imageUrls: JSON.stringify(imageUrls),
             sellerId: session.user.id,
             categoryId,
+            stock: otherFields.stock || 0,
+            minOrder: otherFields.minOrder || 1,
+            ...(otherFields.dimensions && { dimensions: JSON.stringify(otherFields.dimensions) }),
+            ...(otherFields.colors && { colors: JSON.stringify(otherFields.colors) }),
+            ...(otherFields.sizes && { sizes: JSON.stringify(otherFields.sizes) }),
+            ...(otherFields.specifications && { specifications: JSON.stringify(otherFields.specifications) }),
+            ...(otherFields.tags && { tags: JSON.stringify(otherFields.tags) }),
+            ...(otherFields.brand && { brand: otherFields.brand }),
+            ...(otherFields.model && { model: otherFields.model }),
+            ...(otherFields.sku && { sku: otherFields.sku }),
+            ...(otherFields.weight && { weight: otherFields.weight }),
+            ...(otherFields.warranty && { warranty: otherFields.warranty }),
+            ...(otherFields.returnPolicy && { returnPolicy: otherFields.returnPolicy }),
+            ...(otherFields.shortDescription && { shortDescription: otherFields.shortDescription }),
+            ...(otherFields.originalPrice && { originalPrice: otherFields.originalPrice }),
           },
         });
         break;
@@ -114,18 +91,33 @@ export async function POST(req: Request) {
           name,
           slug: `${baseSlug}-${Date.now()}`,
           description,
-          price: priceNum,
-          imageUrls: JSON.stringify(imagesNormalized),
+          price,
+          imageUrls: JSON.stringify(imageUrls),
           sellerId: session.user.id,
           categoryId,
+          stock: otherFields.stock || 0,
+          minOrder: otherFields.minOrder || 1,
+          ...(otherFields.dimensions && { dimensions: JSON.stringify(otherFields.dimensions) }),
+          ...(otherFields.colors && { colors: JSON.stringify(otherFields.colors) }),
+          ...(otherFields.sizes && { sizes: JSON.stringify(otherFields.sizes) }),
+          ...(otherFields.specifications && { specifications: JSON.stringify(otherFields.specifications) }),
+          ...(otherFields.tags && { tags: JSON.stringify(otherFields.tags) }),
+          ...(otherFields.brand && { brand: otherFields.brand }),
+          ...(otherFields.model && { model: otherFields.model }),
+          ...(otherFields.sku && { sku: otherFields.sku }),
+          ...(otherFields.weight && { weight: otherFields.weight }),
+          ...(otherFields.warranty && { warranty: otherFields.warranty }),
+          ...(otherFields.returnPolicy && { returnPolicy: otherFields.returnPolicy }),
+          ...(otherFields.shortDescription && { shortDescription: otherFields.shortDescription }),
+          ...(otherFields.originalPrice && { originalPrice: otherFields.originalPrice }),
         },
       });
     }
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.error(error);
-    return new NextResponse("Something went wrong", { status: 500 });
+    const { status, body } = handleApiError(error);
+    return NextResponse.json(body, { status });
   }
 }
 
@@ -206,7 +198,7 @@ export async function GET(req: Request) {
     res.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
     return res
   } catch (error) {
-    console.error(error);
-    return new NextResponse("Something went wrong", { status: 500 });
+    const { status, body } = handleApiError(error);
+    return NextResponse.json(body, { status });
   }
 }

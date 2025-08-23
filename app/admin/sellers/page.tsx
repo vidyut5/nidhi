@@ -5,7 +5,7 @@ import { approveSeller, rejectSeller } from './actions'
 
 export default async function AdminSellersPage() {
   const pending = await prisma.sellerProfile.findMany({
-    where: { verificationStatus: 'pending' },
+    where: { verificationStatus: 'PENDING' },
     include: { user: { select: { id: true, email: true, name: true } } },
     orderBy: { createdAt: 'desc' },
   })

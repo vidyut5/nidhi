@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useCartStore } from "@/lib/cart-store"
 import { ShoppingCart, Minus, Plus, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { logger } from "@/lib/logger"
 
 interface Product {
   id: string
@@ -56,7 +57,7 @@ export function AddToCartButton({
             const parsed = JSON.parse(str)
             imageUrls = Array.isArray(parsed) ? parsed : []
           } catch (e) {
-            console.error('Failed to parse imageUrls JSON', e)
+            logger.error('Failed to parse imageUrls JSON', e instanceof Error ? e : undefined, { productId: product.id })
             imageUrls = []
           }
         } else if (str.length > 0) {
@@ -81,7 +82,7 @@ export function AddToCartButton({
       setJustAdded(true)
       setTimeout(() => setJustAdded(false), 2000)
     } catch (error) {
-      console.error('Error adding to cart:', error)
+      logger.error('Error adding to cart', error instanceof Error ? error : undefined, { productId: product.id })
     } finally {
       setIsLoading(false)
     }
@@ -94,7 +95,7 @@ export function AddToCartButton({
     try {
       updateQuantity(product.id, newQuantity)
     } catch (error) {
-      console.error('Error updating quantity:', error)
+      logger.error('Error updating quantity', error instanceof Error ? error : undefined, { productId: product.id, newQuantity })
     } finally {
       setIsLoading(false)
     }

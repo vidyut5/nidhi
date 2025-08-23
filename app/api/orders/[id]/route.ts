@@ -46,8 +46,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
       if (!createdAt) return []
       const status = o.status
       const relevantKeys: Array<keyof typeof ORDER_TIMELINE_CONFIG> = (() => {
-        if (status === 'cancelled') return ['ordered', 'cancelled']
-        if (status === 'returned') return ['ordered', 'confirmed', 'processing', 'shipped', 'delivered', 'returned']
+        if (status === 'CANCELLED') return ['ordered', 'cancelled']
+        if (status === 'RETURNED') return ['ordered', 'confirmed', 'processing', 'shipped', 'delivered', 'returned']
         return ['ordered', 'confirmed', 'processing', 'shipped', 'delivered']
       })()
       const steps = relevantKeys.map((key) => {
@@ -66,9 +66,9 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     const steps = generateOrderTimeline(order)
     const indexFound = steps.findIndex(s => s.key === (order.status as any))
     let currentIndex: number
-    if (order.status === 'processing') {
+    if (order.status === 'PROCESSING') {
       currentIndex = 2
-    } else if (order.status === 'confirmed') {
+    } else if (order.status === 'CONFIRMED') {
       currentIndex = 1
     } else {
       currentIndex = Math.max(indexFound, 0)
